@@ -41,20 +41,21 @@ class EmotionControlNode(Node):
         # duty 값을 사용하여 서보 모터 제어
         servo.ChangeDutyCycle(duty)
 
-    def move_servo_back_and_forth(self, servo, start_degree, end_degree, duration):
+    def move_servo_back_and_forth(self, servo, start_degree, end_degree, duration, num_cycles):
         # 각도를 서보가 왔다갔다 하는 함수
         steps = 10
         delay = duration / (2 * steps)
 
-        for _ in range(steps):
-            for degree in range(start_degree, end_degree + 1, 5):
-                self.set_servo_pos(servo, degree)
-                sleep(delay)
+        for _ in range(num_cycles):
+            for _ in range(steps):
+                for degree in range(start_degree, end_degree + 1, 5):
+                    self.set_servo_pos(servo, degree)
+                    sleep(delay)
 
-        for _ in range(steps):
-            for degree in range(end_degree, start_degree - 1, -5):
-                self.set_servo_pos(servo, degree)
-                sleep(delay)
+            for _ in range(steps):
+                for degree in range(end_degree, start_degree - 1, -5):
+                    self.set_servo_pos(servo, degree)
+                    sleep(delay)
 
     def emotion_callback(self, msg):
         emotion = msg.data
@@ -64,7 +65,7 @@ class EmotionControlNode(Node):
             start_degree = 40
             end_degree = 70
             # 왼쪽 서보 모터를 왔다갔다 움직임
-            self.move_servo_back_and_forth(self.servo_left, start_degree, end_degree, duration=2)
+            self.move_servo_back_and_forth(self.servo_left, start_degree, end_degree, duration=4, num_cycles=3)
         elif emotion == "2":
             self.set_servo_pos(self.servo_left, 180)
             self.set_servo_pos(self.servo_right, 180)
