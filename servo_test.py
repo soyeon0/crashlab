@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO #RPi.GPIO 라이브러리를 GPIO로 사용
 from time import sleep  #time 라이브러리의 sleep함수 사용
 
-servoPin          = 12   # 서보 핀
+servoPin          = 16   # 서보 핀
 SERVO_MAX_DUTY    = 12   # 서보의 최대(180도) 위치의 주기
 SERVO_MIN_DUTY    = 3    # 서보의 최소(0도) 위치의 주기
 
@@ -32,21 +32,21 @@ def setServoPos(degree):
 
 if __name__ == "__main__":  
   # 서보 0도에 위치
-  setServoPos(0)
+  setServoPos(60)
   sleep(1) # 1초 대기
   # 90도에 위치
-  setServoPos(90)
+  setServoPos(110)
   sleep(1)
   # 50도..
-  setServoPos(50)
+  setServoPos(60)
   sleep(1)
 
   # 120도..
-  setServoPos(120)
+  setServoPos(110)
   sleep(1)
 
   # 180도에 위치
-  setServoPos(180)
+  setServoPos(80)
   sleep(1)
 
   # 서보 PWM 정지
