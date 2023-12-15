@@ -48,34 +48,34 @@ class EmotionControlNode(Node):
         print(emotion)
 
         if emotion == "1":
-            # 왼쪽 서보 모터를 왔다갔다 움직임
+            # 왼쪽 서보 모터와 오른쪽 서보 모터를 왔다갔다 움직임
             for _ in range(3):
                 self.set_servo_pos(self.servo_left, 60)
                 self.set_servo_pos(self.servo_right, 100)
-                time.sleep(0.5)
+                time.sleep(1)
 
                 self.set_servo_pos(self.servo_left, 100)
                 self.set_servo_pos(self.servo_right, 60)
-                time.sleep(0.5)
+                time.sleep(1)
                 
         elif emotion == "2":
             # 쫑긋 상태
             self.set_servo_pos(self.servo_left, 90)
             self.set_servo_pos(self.servo_right, 90)
+            time.sleep(1)
 
         elif emotion == "3":
             # 기본 상태
             self.set_servo_pos(self.servo_left, 70)
             self.set_servo_pos(self.servo_right, 110)
+            time.sleep(1)
 
         elif emotion == "4":
             # 질문 상태
             self.set_servo_pos(self.servo_left, 90)
             self.set_servo_pos(self.servo_right, 120)
-            
-        else:
-            # TODO: 다른 감정에 대한 서보 모터 및 GIF 제어 코드 추가
-            pass
+            time.sleep(1)
+
 
 def main(args=None):
     rclpy.init(args=args)
