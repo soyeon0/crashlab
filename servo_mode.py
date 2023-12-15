@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 import RPi.GPIO as GPIO
-from time import sleep
+import time
 
 servo_pin_left = 16  # 왼쪽 서보 핀
 servo_pin_right = 18  # 오른쪽 서보 핀
@@ -41,40 +41,35 @@ class EmotionControlNode(Node):
         # duty 값을 사용하여 서보 모터 제어
         servo.ChangeDutyCycle(duty)
 
-    def move_servo_back_and_forth(self, servo, start_degree, end_degree, duration, num_cycles):
+    def move_servo_back_and_forth(self, servo, start_degree, end_degree, num_cycles):
         # 각도를 서보가 왔다갔다 하는 함수
-        steps = 10
-        delay = duration / (2 * steps)
+        delay = 10  # 각도를 유지하는 시간 (milliseconds)
 
         for _ in range(num_cycles):
+            self.set_servo_pos(servo, start_degree)
+            self.spin_for_duration(delay)
 
-            for _ in range(steps):
-                for degree in range(start_degree, end_degree + 1, 10):
-                    self.set_servo_pos(servo, degree)
-                    rclpy.spin_once(self, timeout_sec=0.0)  # 비동기 이벤트 처리
+            self.set_servo_pos(servo, end_degree)
+            self.spin_for_duration(delay)
 
-                rclpy.spin_once(self, timeout_sec=delay)  # 비동기 이벤트 처리 및 지연
+    def spin_for_duration(self, duration_ms):
+        start_time = time.time()
 
-            for _ in range(steps):
-                for degree in range(end_degree, start_degree - 1, -10):
-                    self.set_servo_pos(servo, degree)
-                    rclpy.spin_once(self, timeout_sec=0.0)  # 비동기 이벤트 처리
-
-                rclpy.spin_once(self, timeout_sec=delay)  # 비동기 이벤트 처리 및 지연
+        while (time.time() - start_time) * 1000 < duration_ms:
+            rclpy.spin_once(self, timeout_sec=0.01)  # 적절한 timeout 값 사용
 
     def emotion_callback(self, msg):
         emotion = msg.data
 
         if emotion == "1":
-            # 이동하고자 하는 각도 범위 설정 (40도에서 70도)
-            start_degree = 60
-            end_degree = 110
             # 왼쪽 서보 모터를 왔다갔다 움직임
-            self.move_servo_back_and_forth(self.servo_left, start_degree = 60, end_degree=100, duration=4, num_cycles=3)
-            self.move_servo_back_and_forth(self.servo_right, start_degree=100, end_degree=60, duration=4, num_cycles=3)
+            print("1번 모드")
+            self.move_servo_back_and_forth(self.servo_left, start_degree = 60, end_degree=100, num_cycles=3)
+            
         elif emotion == "2":
+            # 쫑긋 상태
+            print("2번 모드")
             self.set_servo_pos(self.servo_left, 90)
-            self.set_servo_pos(self.servo_right, 90)
         else:
             # TODO: 다른 감정에 대한 서보 모터 및 GIF 제어 코드 추가
             pass
