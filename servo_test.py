@@ -32,13 +32,13 @@ def setServoPos(degree):
 
 if __name__ == "__main__":  
   # 서보 0도에 위치
-  setServoPos(60)
+  setServoPos(70)
   sleep(1) # 1초 대기
   # 90도에 위치
   setServoPos(110)
   sleep(1)
   # 50도..
-  setServoPos(60)
+  setServoPos(70)
   sleep(1)
 
   # 120도..
