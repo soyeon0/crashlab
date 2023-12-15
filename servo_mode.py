@@ -41,31 +41,35 @@ class EmotionControlNode(Node):
         # duty 값을 사용하여 서보 모터 제어
         servo.ChangeDutyCycle(duty)
 
-    def move_servo_back_and_forth(self, servo, start_degree, end_degree, num_cycles):
-        # 각도를 서보가 왔다갔다 하는 함수
-
-        for _ in range(num_cycles):
-            self.set_servo_pos(servo, start_degree)
-            time.sleep(3)
-
-            self.set_servo_pos(servo, end_degree)
-            time.sleep(3)
-
     def emotion_callback(self, msg):
         emotion = msg.data
         print(emotion)
 
         if emotion == "1":
             # 왼쪽 서보 모터를 왔다갔다 움직임
-            print("1번 모드")
-            self.move_servo_back_and_forth(self.servo_left, start_degree = 60, end_degree=100, num_cycles=3)
-            print("1번 모드 끝")
-            
+            for _ in range(3):
+                self.set_servo_pos(self.servo_left, 60)
+                self.set_servo_pos(self.servo_right, 100)
+                time.sleep(1)
+
+                self.set_servo_pos(self.servo_left, 100)
+                self.set_servo_pos(self.servo_right, 60)
+                time.sleep(1)
+                
         elif emotion == "2":
             # 쫑긋 상태
-            print("2번 모드")
             self.set_servo_pos(self.servo_left, 90)
-            print("번 모드 끝")
+            self.set_servo_pos(self.servo_right, 90)
+
+        elif emotion == "3":
+            # 기본 상태
+            self.set_servo_pos(self.servo_left, 70)
+            self.set_servo_pos(self.servo_right, 110)
+
+        elif emotion == "4":
+            # 질문 상태
+            self.set_servo_pos(self.servo_left, 90)
+            self.set_servo_pos(self.servo_right, 120)
             
         else:
             # TODO: 다른 감정에 대한 서보 모터 및 GIF 제어 코드 추가
