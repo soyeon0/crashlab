@@ -75,6 +75,9 @@ class EmotionControlNode(Node):
             # TODO: 다른 감정에 대한 서보 모터 및 GIF 제어 코드 추가
             pass
 
+        self.servo_left.ChangeDutyCycle(0)
+        self.servo_right.ChangeDutyCycle(0)
+
 def main(args=None):
     rclpy.init(args=args)
     node = EmotionControlNode()
