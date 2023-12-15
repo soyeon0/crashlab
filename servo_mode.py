@@ -51,12 +51,14 @@ class EmotionControlNode(Node):
 
             self.set_servo_pos(servo, end_degree)
             self.spin_for_duration(delay)
+        print("move 함수 끝")
 
     def spin_for_duration(self, duration_ms):
         start_time = time.time()
 
         while (time.time() - start_time) * 1000 < duration_ms:
             rclpy.spin_once(self, timeout_sec=0.01)  # 적절한 timeout 값 사용
+            print("for문")
 
     def emotion_callback(self, msg):
         emotion = msg.data
