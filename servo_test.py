@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO #RPi.GPIO 라이브러리를 GPIO로 사용
 from time import sleep  #time 라이브러리의 sleep함수 사용
 
-servoPin          = 16   # 서보 핀
+servoPin          = 18   # 서보 핀
 SERVO_MAX_DUTY    = 12   # 서보의 최대(180도) 위치의 주기
 SERVO_MIN_DUTY    = 3    # 서보의 최소(0도) 위치의 주기
 
