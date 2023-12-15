@@ -40,6 +40,8 @@ class EmotionControlNode(Node):
 
         # duty 값을 사용하여 서보 모터 제어
         servo.ChangeDutyCycle(duty)
+        time.sleep(0.5)  # 0.5초 동안 PWM 신호를 유지
+        servo.ChangeDutyCycle(0)  # PWM 신호를 중지하여 서보 모터의 움직임을 멈춤
 
     def emotion_callback(self, msg):
         emotion = msg.data
@@ -50,11 +52,11 @@ class EmotionControlNode(Node):
             for _ in range(3):
                 self.set_servo_pos(self.servo_left, 60)
                 self.set_servo_pos(self.servo_right, 100)
-                time.sleep(1)
+                time.sleep(0.5)
 
                 self.set_servo_pos(self.servo_left, 100)
                 self.set_servo_pos(self.servo_right, 60)
-                time.sleep(1)
+                time.sleep(0.5)
                 
         elif emotion == "2":
             # 쫑긋 상태
@@ -74,9 +76,6 @@ class EmotionControlNode(Node):
         else:
             # TODO: 다른 감정에 대한 서보 모터 및 GIF 제어 코드 추가
             pass
-
-        self.servo_left.ChangeDutyCycle(0)
-        self.servo_right.ChangeDutyCycle(0)
 
 def main(args=None):
     rclpy.init(args=args)
