@@ -4,8 +4,8 @@ from std_msgs.msg import String
 import RPi.GPIO as GPIO
 from time import sleep
 
-servo_pin_left = 12  # 왼쪽 서보 핀
-servo_pin_right = 10  # 오른쪽 서보 핀
+servo_pin_left = 16  # 왼쪽 서보 핀
+servo_pin_right = 18  # 오른쪽 서보 핀
 SERVO_MAX_DUTY = 12  # 서보의 최대(180도) 위치의 주기
 SERVO_MIN_DUTY = 3   # 서보의 최소(0도) 위치의 주기
 
@@ -48,12 +48,12 @@ class EmotionControlNode(Node):
 
         for _ in range(num_cycles):
             for _ in range(steps):
-                for degree in range(start_degree, end_degree + 1, 5):
+                for degree in range(start_degree, end_degree + 1, 10):
                     self.set_servo_pos(servo, degree)
                     sleep(delay)
 
             for _ in range(steps):
-                for degree in range(end_degree, start_degree - 1, -5):
+                for degree in range(end_degree, start_degree - 1, -10):
                     self.set_servo_pos(servo, degree)
                     sleep(delay)
 
@@ -62,13 +62,13 @@ class EmotionControlNode(Node):
 
         if emotion == "1":
             # 이동하고자 하는 각도 범위 설정 (40도에서 70도)
-            start_degree = 40
-            end_degree = 70
+            start_degree = 60
+            end_degree = 110
             # 왼쪽 서보 모터를 왔다갔다 움직임
             self.move_servo_back_and_forth(self.servo_left, start_degree, end_degree, duration=4, num_cycles=3)
         elif emotion == "2":
-            self.set_servo_pos(self.servo_left, 180)
-            self.set_servo_pos(self.servo_right, 180)
+            self.set_servo_pos(self.servo_left, 90)
+            self.set_servo_pos(self.servo_right, 90)
         else:
             # TODO: 다른 감정에 대한 서보 모터 및 GIF 제어 코드 추가
             pass
