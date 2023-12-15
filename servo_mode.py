@@ -57,6 +57,7 @@ class EmotionControlNode(Node):
         start_time = time.time()
 
         while (time.time() - start_time) * 1000 < duration_ms:
+            print(time.time())
             rclpy.spin_once(self, timeout_sec=0.01)  # 적절한 timeout 값 사용
             print("for문")
 
