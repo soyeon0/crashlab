@@ -43,24 +43,13 @@ class EmotionControlNode(Node):
 
     def move_servo_back_and_forth(self, servo, start_degree, end_degree, num_cycles):
         # 각도를 서보가 왔다갔다 하는 함수
-        delay = 5  # 각도를 유지하는 시간 (milliseconds)
 
         for _ in range(num_cycles):
             self.set_servo_pos(servo, start_degree)
-            self.spin_for_duration(delay)
+            time.sleep(3)
 
             self.set_servo_pos(servo, end_degree)
-            self.spin_for_duration(delay)
-        print("move 함수 끝")
-
-    def spin_for_duration(self, duration_ms):
-        start_time = time.time()
-
-        while (time.time() - start_time) * 1000 < duration_ms:
-            print(time.time())
-            rclpy.spin_once(self, timeout_sec=0.01)  # 적절한 timeout 값 사용
-
-        rclpy.spin_once(self, timeout_sec=0.01)  # 추가로 한 번 더 spin_once 호출
+            time.sleep(3)
 
     def emotion_callback(self, msg):
         emotion = msg.data
