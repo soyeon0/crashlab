@@ -43,7 +43,7 @@ class EmotionControlNode(Node):
 
     def move_servo_back_and_forth(self, servo, start_degree, end_degree, num_cycles):
         # 각도를 서보가 왔다갔다 하는 함수
-        delay = 10  # 각도를 유지하는 시간 (milliseconds)
+        delay = 5  # 각도를 유지하는 시간 (milliseconds)
 
         for _ in range(num_cycles):
             self.set_servo_pos(servo, start_degree)
@@ -59,20 +59,25 @@ class EmotionControlNode(Node):
         while (time.time() - start_time) * 1000 < duration_ms:
             print(time.time())
             rclpy.spin_once(self, timeout_sec=0.01)  # 적절한 timeout 값 사용
-            print("for문")
+
+        rclpy.spin_once(self, timeout_sec=0.01)  # 추가로 한 번 더 spin_once 호출
 
     def emotion_callback(self, msg):
         emotion = msg.data
+        print(emotion)
 
         if emotion == "1":
             # 왼쪽 서보 모터를 왔다갔다 움직임
             print("1번 모드")
             self.move_servo_back_and_forth(self.servo_left, start_degree = 60, end_degree=100, num_cycles=3)
+            print("1번 모드 끝")
             
         elif emotion == "2":
             # 쫑긋 상태
             print("2번 모드")
             self.set_servo_pos(self.servo_left, 90)
+            print("번 모드 끝")
+            
         else:
             # TODO: 다른 감정에 대한 서보 모터 및 GIF 제어 코드 추가
             pass
