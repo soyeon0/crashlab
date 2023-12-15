@@ -47,15 +47,20 @@ class EmotionControlNode(Node):
         delay = duration / (2 * steps)
 
         for _ in range(num_cycles):
+
             for _ in range(steps):
                 for degree in range(start_degree, end_degree + 1, 10):
                     self.set_servo_pos(servo, degree)
-                    sleep(delay)
+                    rclpy.spin_once(self, timeout_sec=0.0)  # 비동기 이벤트 처리
+
+                rclpy.spin_once(self, timeout_sec=delay)  # 비동기 이벤트 처리 및 지연
 
             for _ in range(steps):
                 for degree in range(end_degree, start_degree - 1, -10):
                     self.set_servo_pos(servo, degree)
-                    sleep(delay)
+                    rclpy.spin_once(self, timeout_sec=0.0)  # 비동기 이벤트 처리
+
+                rclpy.spin_once(self, timeout_sec=delay)  # 비동기 이벤트 처리 및 지연
 
     def emotion_callback(self, msg):
         emotion = msg.data
@@ -65,7 +70,8 @@ class EmotionControlNode(Node):
             start_degree = 60
             end_degree = 110
             # 왼쪽 서보 모터를 왔다갔다 움직임
-            self.move_servo_back_and_forth(self.servo_left, start_degree, end_degree, duration=4, num_cycles=3)
+            self.move_servo_back_and_forth(self.servo_left, start_degree = 60, end_degree=100, duration=4, num_cycles=3)
+            self.move_servo_back_and_forth(self.servo_right, start_degree=100, end_degree=60, duration=4, num_cycles=3)
         elif emotion == "2":
             self.set_servo_pos(self.servo_left, 90)
             self.set_servo_pos(self.servo_right, 90)
