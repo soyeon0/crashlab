@@ -15,7 +15,7 @@ class EmotionControlNode(Node):
 
         self.emotion_subscriber = self.create_subscription(
             String,
-            '/topic',
+            '/heendy_emotion',
             self.emotion_callback,
             10
         )
