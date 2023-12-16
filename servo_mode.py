@@ -44,8 +44,9 @@ class EmotionControlNode(Node):
     def emotion_callback(self, msg):
         emotion = msg.data
         print(emotion)
+        type(emotion)
 
-        if emotion == "1":
+        if emotion == '기쁨':
             # 왼쪽 서보 모터와 오른쪽 서보 모터를 왔다갔다 움직임
             for _ in range(3):
                 self.set_servo_pos(self.servo_left, 60)
@@ -56,19 +57,19 @@ class EmotionControlNode(Node):
                 self.set_servo_pos(self.servo_right, 60)
                 time.sleep(0.5)
                 
-        elif emotion == "2":
+        elif emotion == '2':
             # 쫑긋 상태
             self.set_servo_pos(self.servo_left, 90)
             self.set_servo_pos(self.servo_right, 90)
             time.sleep(0.3)
 
-        elif emotion == "3":
+        elif emotion == '무기분':
             # 기본 상태
             self.set_servo_pos(self.servo_left, 70)
             self.set_servo_pos(self.servo_right, 110)
             time.sleep(0.3)
 
-        elif emotion == "4":
+        elif emotion == '슬픔':
             # 질문 상태
             self.set_servo_pos(self.servo_left, 90)
             self.set_servo_pos(self.servo_right, 120)
