@@ -30,20 +30,19 @@
             const messageContainer = document.getElementById('message-container');
             if (message.op === 'publish' && message.topic === topicName) {
                 // data 값에 따라 다른 모드 선택
-                const mode = parseInt(message.msg.data);
                 let gifPath;
 
-                switch (mode) {
-                    case 1:
+                switch (message.msg.data) {
+                    case '기쁨':
                         gifPath = 'blink_s.gif';
                         break;
-                    case 2:
+                    case '2':
                         gifPath = 'blink_mode2.gif';
                         break;
-                    case 3:
+                    case '무기분':
                         gifPath = 'blink.gif';
                         break;
-                    case 4:
+                    case '슬픔':
                         gifPath = 'blink_mode4.gif';
                         break;
                     default:
