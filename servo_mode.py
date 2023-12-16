@@ -44,7 +44,7 @@ class EmotionControlNode(Node):
     def emotion_callback(self, msg):
         emotion = msg.data
         print(emotion)
-        type(emotion)
+        print(type(emotion))
 
         if emotion == '기쁨':
             # 왼쪽 서보 모터와 오른쪽 서보 모터를 왔다갔다 움직임
