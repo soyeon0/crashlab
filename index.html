@@ -6,18 +6,31 @@
     <title>ROS 2 WebSocket Subscriber</title>
 </head>
 <body>
-    <h1>ROS 2 WebSocket Subscriber</h1>
     <div id="message-container"></div>
 
     <script>
         const socket = new WebSocket('ws://localhost:9090'); // ROS 2 웹 소켓 포트
-        const topicName = '/heendy_emotion'; // 노드에서 사용하는 토픽 이름
+        const topicNameEmotion = '/heendy_emotion'; // 감정 관련 토픽
+        const topicNameTalking = '/heendy_talking'; // 대화 관련 토픽
+
+        // 초기 GIF 경로
+        let gifPath = 'blink.gif';
+
+        // 초기 상태 GIF 표시
+        const messageContainer = document.getElementById('message-container');
+        messageContainer.innerHTML = `<img src="${gifPath}" alt="Default GIF" style="height:1080px; width: 1920px;">`;
 
         socket.addEventListener('open', (event) => {
             console.log('웹 소켓 연결이 열렸습니다.');
             socket.send(JSON.stringify({
                 op: 'subscribe',
-                topic: topicName,
+                topic: topicNameEmotion,
+                type: 'std_msgs/String',
+            }));
+
+            socket.send(JSON.stringify({
+                op: 'subscribe',
+                topic: topicNameTalking,
                 type: 'std_msgs/String',
             }));
         });
@@ -27,29 +40,32 @@
             console.log('수신된 메시지:', message);
 
             // 수신된 메시지를 HTML에 갱신
-            const messageContainer = document.getElementById('message-container');
-            if (message.op === 'publish' && message.topic === topicName) {
-                // data 값에 따라 다른 모드 선택
-                let gifPath;
+            if (message.op === 'publish') {
 
-                switch (message.msg.data) {
-                    case '기쁨':
-                        gifPath = 'blink_s.gif';
-                        break;
-                    case '2':
-                        gifPath = 'blink_mode2.gif';
-                        break;
-                    case '무기분':
-                        gifPath = 'blink.gif';
-                        break;
-                    case '슬픔':
-                        gifPath = 'blink_mode4.gif';
-                        break;
-                    default:
-                        gifPath = 'blink.gif';
+                if (message.topic === topicNameEmotion) {
+                    // 감정 메시지 처리
+                    switch (message.msg.data) {
+                        case '무기분':
+                            gifPath = 'usual_talking.gif';
+                            break;
+                        case '기쁨':
+                            gifPath = 'happy_talking.gif';
+                            break;
+                        case '슬픔':
+                            gifPath = 'sorry_talking.gif';
+                            break;
+                        default:
+                            gifPath = 'usual_talking.gif';
+                    }
+                } else if (message.topic === topicNameTalking) {
+                    // 대화 메시지 처리
+                    if (message.msg.data === 'end') {
+                        gifPath = gifPath.replace('_talking', ''); // "_talking" 부분 제외
+                    }
                 }
 
-                messageContainer.innerHTML = `<p>수신된 메시지: ${message.msg.data}</p><img src="${gifPath}" alt="Your GIF" style="height:1080px; width: 1920px;">`;
+                // GIF 업데이트
+                messageContainer.innerHTML = `<img src="${gifPath}" alt="Your GIF" style="height:1080px; width: 1920px;">`;
             }
         });
 
