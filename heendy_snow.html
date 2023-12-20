@@ -565,6 +565,9 @@
 
 </head>
 <body>
+    <div id="thinking-container" style="display: none;">
+        <h3>대답 생성 중...</h3>
+    </div>
     <div id="chat-messages">
     </div>
 
@@ -632,13 +635,14 @@
         <!-- Add any content related to driving messages here -->
     </div>
     <img id="heartImage" src="./heart_arm.png" alt="하트 이미지" style="position: fixed; top: 0px; left: 50%; transform: translateX(-50%); display: none; z-index: 20;">
+    
 
     <script>
         const socket = new WebSocket('ws://localhost:9090');
         const topicNameText = '/heendy_text';
         const topicNameStt = '/heendy_stt';
         const topicNameWalk = '/heendy_walk';
-        const topicNameAd = '/heendy_alk';
+        const topicNameAd = '/heendy_talk';
         const topicNameheart = '/heendy_emotion';
 
         function subscribeToTopic(topic) {
@@ -696,6 +700,7 @@
                     imageElement.src = "./heendy.png"; // 이미지 소스 설정
                     imageElement.alt = "흰디 이미지"; // 대체 텍스트 설정 (이미지가 로드되지 않을 경우 표시)
 
+                    const thinkingContainer = document.getElementById('thinking-container');
                     // 메세지 추가
 
                     // message.topic이 topicNameText와 같을 때만 이미지를 추가
@@ -715,6 +720,8 @@
 
                         container.appendChild(heendychatContainer);
 
+                        thinkingContainer.style.display = 'none';
+
                     } else {
                         const customerchatContainer = document.createElement('div');
                         customerchatContainer.className = 'customer_chat_container';
@@ -727,6 +734,8 @@
                         customerchatContainer.appendChild(messageElement);
                         
                         container.appendChild(customerchatContainer);
+
+                        thinkingContainer.style.display = 'block';
 
                     }
 
