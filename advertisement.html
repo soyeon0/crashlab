@@ -1,0 +1,74 @@
+<!-- 광고.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- head 부분은 여기에 추가 -->
+    <style>
+        /* 배경색을 검은색으로 설정 */
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* 비디오를 화면에 맞춤 */
+        video {
+            position: fixed;
+            min-width: 100%;
+            /* min-height: 100%; */
+            width: auto;
+            height: auto;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <!-- 기존 내용은 여기에 추가 -->
+
+    <script>
+        const socket = new WebSocket('ws://localhost:9090');
+        const topicName = '/user_command';
+
+        function subscribeToTopic(topic) {
+            socket.send(JSON.stringify({
+                op: 'subscribe',
+                topic: topic,
+                type: 'std_msgs/String',
+            }));
+        }
+
+        socket.addEventListener('open', (event) => {
+            console.log('웹 소켓 연결이 열렸습니다.');
+            subscribeToTopic(topicName);
+        });
+
+        socket.addEventListener('message', (event) => {
+            const message = JSON.parse(event.data);
+            console.log('수신된 메시지:', message);
+
+            if (message.op === 'publish' && message.msg.data === 'start') {
+                // two 메시지가 오면 heendy_snow.html로 이동
+                window.location.href = 'heendy_snow.html';
+            }
+        });
+
+        socket.addEventListener('close', (event) => {
+            console.log('웹 소켓 연결이 닫혔습니다.');
+        });
+
+        socket.addEventListener('error', (event) => {
+            console.error('웹 소켓 오류:', event);
+        });
+    </script>
+
+    <!-- 추가: MP4 비디오 재생 코드 -->
+    <video autoplay loop muted>
+        <source src="./Xmas_Sweet_Delivery.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</body>
+</html>
