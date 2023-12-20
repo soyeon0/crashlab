@@ -46,25 +46,35 @@ class EmotionControlNode(Node):
         print(emotion)
 
         if emotion == '무기분':
-            self.set_servo_pos(self.servo_left, 90)
-            self.set_servo_pos(self.servo_right, 90)
+            self.set_servo_pos(self.servo_left, 80)
+            self.set_servo_pos(self.servo_right, 80)
             time.sleep(0.3)
                 
         elif emotion == '기쁨':
             for _ in range(3):
-                self.set_servo_pos(self.servo_left, 60)
-                self.set_servo_pos(self.servo_right, 120)
-                time.sleep(0.5)
-
-                self.set_servo_pos(self.servo_left, 90)
+                self.set_servo_pos(self.servo_left, 70)
                 self.set_servo_pos(self.servo_right, 90)
                 time.sleep(0.5)
 
+                self.set_servo_pos(self.servo_left, 80)
+                self.set_servo_pos(self.servo_right, 80)
+                time.sleep(0.5)
+
         elif emotion == '슬픔':
-            self.set_servo_pos(self.servo_left, 60)
+            self.set_servo_pos(self.servo_left, 70)
             time.sleep(0.3)
-            self.set_servo_pos(self.servo_right, 120)
+            self.set_servo_pos(self.servo_right, 90)
             time.sleep(0.3)
+
+        elif emotion == '하트':
+            for _ in range(3):
+                self.set_servo_pos(self.servo_left, 70)
+                self.set_servo_pos(self.servo_right, 90)
+                time.sleep(0.5)
+
+                self.set_servo_pos(self.servo_left, 80)
+                self.set_servo_pos(self.servo_right, 80)
+                time.sleep(0.5)
 
         self.servo_left.ChangeDutyCycle(0)  # PWM 신호를 중지하여 서보 모터의 움직임을 멈춤
         self.servo_right.ChangeDutyCycle(0)  # PWM 신호를 중지하여 서보 모터의 움직임을 멈춤
