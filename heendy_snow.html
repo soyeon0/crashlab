@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROS 2 WebSocket Subscriber</title>
+
+    <!-- 자막 -->
+    <style>
+        @font-face {
+            font-family: 'NPSfontBold';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2310@1.0/NPSfontBold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+        
+        #chat-messages {
+            position: absolute;
+
+            font-family: 'NPSfontBold';
+            color: rgba(0, 0, 0, 0.831);
+
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+
+            width: 100vw;
+            max-height: 1060px;
+            padding-bottom: 20px;
+            z-index: 10; /* 다른 요소 위에 놓기 위해 z-index 사용 */
+        }
+        h3{
+            text-align: center;
+            font-size: 100px;
+            margin: 50px;
+        }
+        .customer_chat_container, .heendy_chat_container{
+            max-width: 100vw;
+            padding: 30px;
+        }
+
+        .heendy_img{
+            margin-left: 30px;
+            width: 150px;
+            height: 150px;
+        }
+        .heendy_chat_container{
+            display: flex;
+        }
+
+        .customer-message, .heendy-message{
+            padding: 50px;
+            margin-top: 40px;
+            max-width: 1400px;
+            overflow-wrap: break-word;
+            clear: both;
+            display: inline-block;
+            border-bottom-right-radius: 50px;
+            border-bottom-left-radius: 50px;
+        }     
+                
+        .heendy-message{
+            float: left;
+            margin-left: 30px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-top-right-radius: 50px;
+        }
+
+        .customer-message{
+            float: right;
+            margin-right: 50px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-top-left-radius: 50px;
+        }
+
+        p {
+            font-size: 70px; /* 원하는 크기로 지정 */
+            margin: 0;
+            line-height: 1.8;
+        }
+
+    </style>
+
+    <!-- 눈 배경 -->
+    <style>
+        html,body {
+            margin: 0;
+        }
+        .white{
+            background-color: rgba(255, 255, 255, 0.338);
+            position: absolute; /* 절대 위치를 사용하여 겹치도록 설정합니다. */
+            width: 100vw;
+            height: 1080px;
+            z-index: 5; /* 다른 요소 위에 놓기 위해 z-index 사용 */
+            
+        }
+        .wrapper {
+            position: relative; /* 이를 기준으로 chat-messages를 배치합니다. */
+            width:100vw;
+            height:1080px;
+            background: radial-gradient(farthest-corner at 30vw 20vh,#4996ab 1%,rgb(44, 49, 65) 100%);
+        }
+
+
+        .snowflake {
+            --size: 1vw;
+            width: var(--size);
+            height: var(--size);
+            background: rgba(255, 255, 255, 0.591);
+            border-radius: 50%;
+            position: absolute;
+            top: -5vh;
+        }
+        @keyframes snowfall {
+            0% {
+                transform: translate3d(var(--left-ini), 0, 0);
+            }
+            100% {
+                transform: translate3d(var(--left-end), 110vh, 0);
+            }
+        }
+        .snowflake:nth-child(1) {
+            --size: 1vw;
+            --left-ini: -8vw;
+            --left-end: 3vw;
+            left: 21vw;
+            animation: snowfall 12s linear infinite;
+            animation-delay: -10s;
+        }
+        .snowflake:nth-child(2) {
+            --size: 0.6vw;
+            --left-ini: 2vw;
+            --left-end: 10vw;
+            left: 17vw;
+            animation: snowfall 9s linear infinite;
+            animation-delay: -9s;
+        }
+        .snowflake:nth-child(3) {
+            --size: 0.8vw;
+            --left-ini: -5vw;
+            --left-end: -7vw;
+            left: 78vw;
+            animation: snowfall 12s linear infinite;
+            animation-delay: -1s;
+        }
+        .snowflake:nth-child(4) {
+            --size: 0.2vw;
+            --left-ini: -1vw;
+            --left-end: -9vw;
+            left: 57vw;
+            animation: snowfall 6s linear infinite;
+            animation-delay: -9s;
+        }
+        .snowflake:nth-child(5) {
+            --size: 0.2vw;
+            --left-ini: 9vw;
+            --left-end: -1vw;
+            left: 39vw;
+            animation: snowfall 10s linear infinite;
+            animation-delay: -3s;
+        }
+        .snowflake:nth-child(6) {
+            --size: 0.8vw;
+            --left-ini: 3vw;
+            --left-end: -6vw;
+            left: 60vw;
+            animation: snowfall 10s linear infinite;
+            animation-delay: -1s;
+        }
+        .snowflake:nth-child(7) {
+            --size: 1vw;
+            --left-ini: -1vw;
+            --left-end: -4vw;
+            left: 89vw;
+            animation: snowfall 6s linear infinite;
+            animation-delay: -8s;
+        }
+        .snowflake:nth-child(8) {
+            --size: 1vw;
+            --left-ini: -4vw;
+            --left-end: -7vw;
+            left: 33vw;
+            animation: snowfall 11s linear infinite;
+            animation-delay: -2s;
+        }
+        .snowflake:nth-child(9) {
+            --size: 1vw;
+            --left-ini: -4vw;
+            --left-end: -4vw;
+            left: 78vw;
+            animation: snowfall 10s linear infinite;
+            animation-delay: -5s;
+        }
+        .snowflake:nth-child(10) {
+            --size: 0.6vw;
+            --left-ini: -3vw;
+            --left-end: 1vw;
+            left: 73vw;
+            animation: snowfall 15s linear infinite;
+            animation-delay: -7s;
+        }
+        .snowflake:nth-child(11) {
+            --size: 0.4vw;
+            --left-ini: 6vw;
+            --left-end: -1vw;
+            left: 62vw;
+            animation: snowfall 8s linear infinite;
+            animation-delay: -8s;
+        }
+        .snowflake:nth-child(12) {
+            --size: 0.4vw;
+            --left-ini: -1vw;
+            --left-end: 1vw;
+            left: 46vw;
+            animation: snowfall 14s linear infinite;
+            animation-delay: -10s;
+        }
+        .snowflake:nth-child(13) {
+            --size: 0.8vw;
+            --left-ini: 5vw;
+            --left-end: 0vw;
+            left: 28vw;
+            animation: snowfall 9s linear infinite;
+            animation-delay: -5s;
+        }
+        .snowflake:nth-child(14) {
+            --size: 0.8vw;
+            --left-ini: 0vw;
+            --left-end: -8vw;
+            left: 96vw;
+            animation: snowfall 9s linear infinite;
+            animation-delay: -5s;
+        }
+        .snowflake:nth-child(15) {
+            --size: 1vw;
+            --left-ini: 9vw;
+            --left-end: 4vw;
+            left: 48vw;
+            animation: snowfall 8s linear infinite;
+            animation-delay: -5s;
+        }
+        .snowflake:nth-child(16) {
+            --size: 0.6vw;
+            --left-ini: -2vw;
+            --left-end: 6vw;
+            left: 42vw;
+            animation: snowfall 11s linear infinite;
+            animation-delay: -3s;
+        }
+        .snowflake:nth-child(17) {
+            --size: 0.8vw;
+            --left-ini: -5vw;
+            --left-end: -5vw;
+            left: 11vw;
+            animation: snowfall 15s linear infinite;
+            animation-delay: -4s;
+        }
+        .snowflake:nth-child(18) {
+            --size: 1vw;
+            --left-ini: -5vw;
+            --left-end: 2vw;
+            left: 21vw;
+            animation: snowfall 6s linear infinite;
+            animation-delay: -5s;
+        }
+        .snowflake:nth-child(19) {
+            --size: 0.6vw;
+            --left-ini: -6vw;
+            --left-end: 0vw;
+            left: 66vw;
+            animation: snowfall 14s linear infinite;
+            animation-delay: -5s;
+        }
+        .snowflake:nth-child(20) {
+            --size: 0.8vw;
+            --left-ini: 7vw;
+            --left-end: -5vw;
+            left: 20vw;
+            animation: snowfall 9s linear infinite;
+            animation-delay: -4s;
+        }
+        .snowflake:nth-child(21) {
+            --size: 1vw;
+            --left-ini: 5vw;
+            --left-end: -9vw;
+            left: 50vw;
+            animation: snowfall 13s linear infinite;
+            animation-delay: -2s;
+        }
+        .snowflake:nth-child(22) {
+            --size: 0.8vw;
+            --left-ini: 3vw;
+            --left-end: 5vw;
+            left: 16vw;
+            animation: snowfall 12s linear infinite;
+            animation-delay: -8s;
+        }
+        .snowflake:nth-child(23) {
+            --size: 0.2vw;
+            --left-ini: -1vw;
+            --left-end: 5vw;
+            left: 89vw;
+            animation: snowfall 15s linear infinite;
+            animation-delay: -2s;
+        }
+        .snowflake:nth-child(24) {
+            --size: 0.2vw;
+            --left-ini: -8vw;
+            --left-end: -9vw;
+            left: 36vw;
+            animation: snowfall 13s linear infinite;
+            animation-delay: -9s;
+        }
+        .snowflake:nth-child(25) {
+            --size: 0.2vw;
+            --left-ini: -6vw;
+            --left-end: 0vw;
+            left: 100vw;
+            animation: snowfall 8s linear infinite;
+            animation-delay: -3s;
+        }
+        .snowflake:nth-child(26) {
+            --size: 1vw;
+            --left-ini: -4vw;
+            --left-end: 3vw;
+            left: 72vw;
+            animation: snowfall 9s linear infinite;
+            animation-delay: -3s;
+        }
+        .snowflake:nth-child(27) {
+            --size: 0.8vw;
+            --left-ini: -1vw;
+            --left-end: 0vw;
+            left: 23vw;
+            animation: snowfall 14s linear infinite;
+            animation-delay: -1s;
+        }
+        .snowflake:nth-child(28) {
+            --size: 0.2vw;
+            --left-ini: 8vw;
+            --left-end: -5vw;
+            left: 37vw;
+            animation: snowfall 13s linear infinite;
+            animation-delay: -5s;
+        }
+        .snowflake:nth-child(29) {
+            --size: 1vw;
+            --left-ini: 9vw;
+            --left-end: 8vw;
+            left: 61vw;
+            animation: snowfall 12s linear infinite;
+            animation-delay: -1s;
+        }
+        .snowflake:nth-child(30) {
+            --size: 1vw;
+            --left-ini: -4vw;
+            --left-end: -1vw;
+            left: 59vw;
+            animation: snowfall 11s linear infinite;
+            animation-delay: -10s;
+        }
+        .snowflake:nth-child(31) {
+            --size: 1vw;
+            --left-ini: 2vw;
+            --left-end: -3vw;
+            left: 54vw;
+            animation: snowfall 15s linear infinite;
+            animation-delay: -7s;
+        }
+        .snowflake:nth-child(32) {
+            --size: 1vw;
+            --left-ini: -4vw;
+            --left-end: -2vw;
+            left: 82vw;
+            animation: snowfall 6s linear infinite;
+            animation-delay: -6s;
+        }
+        .snowflake:nth-child(33) {
+            --size: 0.8vw;
+            --left-ini: 8vw;
+            --left-end: 4vw;
+            left: 16vw;
+            animation: snowfall 7s linear infinite;
+            animation-delay: -2s;
+        }
+        .snowflake:nth-child(34) {
+            --size: 0.8vw;
+            --left-ini: -8vw;
+            --left-end: -4vw;
+            left: 39vw;
+            animation: snowfall 15s linear infinite;
+            animation-delay: -10s;
+        }
+        .snowflake:nth-child(35) {
+            --size: 1vw;
+            --left-ini: -9vw;
+            --left-end: 6vw;
+            left: 40vw;
+            animation: snowfall 13s linear infinite;
+            animation-delay: -1s;
+        }
+        .snowflake:nth-child(36) {
+            --size: 0.4vw;
+            --left-ini: -6vw;
+            --left-end: -6vw;
+            left: 36vw;
+            animation: snowfall 15s linear infinite;
+            animation-delay: -7s;
+        }
+        .snowflake:nth-child(37) {
+            --size: 0.4vw;
+            --left-ini: -5vw;
+            --left-end: -6vw;
+            left: 90vw;
+            animation: snowfall 7s linear infinite;
+            animation-delay: -9s;
+        }
+        .snowflake:nth-child(38) {
+            --size: 1vw;
+            --left-ini: -8vw;
+            --left-end: -8vw;
+            left: 9vw;
+            animation: snowfall 7s linear infinite;
+            animation-delay: -6s;
+        }
+        .snowflake:nth-child(39) {
+            --size: 0.6vw;
+            --left-ini: 5vw;
+            --left-end: 3vw;
+            left: 83vw;
+            animation: snowfall 7s linear infinite;
+            animation-delay: -3s;
+        }
+        .snowflake:nth-child(40) {
+            --size: 0.6vw;
+            --left-ini: -2vw;
+            --left-end: 1vw;
+            left: 84vw;
+            animation: snowfall 9s linear infinite;
+            animation-delay: -3s;
+        }
+        .snowflake:nth-child(41) {
+            --size: 0.6vw;
+            --left-ini: -1vw;
+            --left-end: -8vw;
+            left: 73vw;
+            animation: snowfall 13s linear infinite;
+            animation-delay: -9s;
+        }
+        .snowflake:nth-child(42) {
+            --size: 0.2vw;
+            --left-ini: -4vw;
+            --left-end: 3vw;
+            left: 19vw;
+            animation: snowfall 13s linear infinite;
+            animation-delay: -10s;
+        }
+        .snowflake:nth-child(43) {
+            --size: 0.4vw;
+            --left-ini: -2vw;
+            --left-end: 4vw;
+            left: 80vw;
+            animation: snowfall 13s linear infinite;
+            animation-delay: -3s;
+        }
+        .snowflake:nth-child(44) {
+            --size: 0.8vw;
+            --left-ini: 6vw;
+            --left-end: -3vw;
+            left: 7vw;
+            animation: snowfall 8s linear infinite;
+            animation-delay: -9s;
+        }
+        .snowflake:nth-child(45) {
+            --size: 0.6vw;
+            --left-ini: -5vw;
+            --left-end: -7vw;
+            left: 60vw;
+            animation: snowfall 8s linear infinite;
+            animation-delay: -7s;
+        }
+        .snowflake:nth-child(46) {
+            --size: 0.2vw;
+            --left-ini: -4vw;
+            --left-end: -9vw;
+            left: 82vw;
+            animation: snowfall 12s linear infinite;
+            animation-delay: -7s;
+        }
+        .snowflake:nth-child(47) {
+            --size: 0.2vw;
+            --left-ini: -4vw;
+            --left-end: -2vw;
+            left: 56vw;
+            animation: snowfall 15s linear infinite;
+            animation-delay: -8s;
+        }
+        .snowflake:nth-child(48) {
+            --size: 0.6vw;
+            --left-ini: 8vw;
+            --left-end: -8vw;
+            left: 11vw;
+            animation: snowfall 15s linear infinite;
+            animation-delay: -10s;
+        }
+        .snowflake:nth-child(49) {
+            --size: 1vw;
+            --left-ini: 3vw;
+            --left-end: 8vw;
+            left: 24vw;
+            animation: snowfall 12s linear infinite;
+            animation-delay: -9s;
+        }
+        .snowflake:nth-child(50) {
+            --size: 1vw;
+            --left-ini: 7vw;
+            --left-end: -8vw;
+            left: 69vw;
+            animation: snowfall 12s linear infinite;
+            animation-delay: -3s;
+        }
+        
+        /* added small blur every 6 snowflakes*/
+        .snowflake:nth-child(6n) {
+            filter: blur(1px);
+        }
+    </style>
+
+</head>
+<body>
+    <div id="chat-messages">
+        <!--<h3> 안내 로봇 흰디 </h3>
+        <div class="customer_chat_container">
+            <div class="customer-message"><p>안녕</p></div>
+        </div>
+        <div class="heendy_chat_container">
+            <img class="heendy_img" src="./heendy.png" alt="흰디 이미지">
+            <div class="heendy-message"><p>안녕하세요, 저는 백화점 안내 로봇 흰디입니다. 어떤 도움이 필요하신가요?</p></div>
+        </div>
+        <div class="customer_chat_container">
+            <div class="customer-message"><p>파란색 운동화를 찾고있어</p></div>
+        </div>
+        <div class="heendy_chat_container">
+            <img class="heendy_img" src="./heendy.png" alt="흰디 이미지">
+            <div class="heendy-message"><p>아하 글쿤요</p></div>
+        </div>
+        <div class="customer_chat_container">
+            <div class="customer-message"><p>꼽니?</p></div>
+        </div>
+        <div class="heendy_chat_container">
+            <img class="heendy_img" src="./heendy.png" alt="흰디 이미지">
+            <div class="heendy-message"><p>아아아니요</p></div>
+        </div>-->
+    </div>
+
+    <div class="white"></div>
+
+    <div class="wrapper">
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+        <div class="snowflake"></div>
+   </div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:9090');
+        const topicNameText = '/heendy_text';
+        const topicNameStt = '/heendy_stt';
+
+        function subscribeToTopic(topic) {
+            socket.send(JSON.stringify({
+                op: 'subscribe',
+                topic: topic,
+                type: 'std_msgs/String',
+            }));
+        }
+
+        socket.addEventListener('open', (event) => {
+            console.log('웹 소켓 연결이 열렸습니다.');
+            subscribeToTopic(topicNameText);
+            subscribeToTopic(topicNameStt);
+        });
+
+        socket.addEventListener('message', (event) => {
+            const message = JSON.parse(event.data);
+            console.log('수신된 메시지:', message);
+
+            if (message.op === 'publish') {
+
+                // 새로운 div 생성
+                const container = document.getElementById('chat-messages');
+
+                const messageElement = document.createElement('div');
+
+                const messageText = document.createElement('p');
+
+                const imageElement = document.createElement("img"); // img 요소 생성
+                imageElement.className = 'heendy_img';
+                imageElement.src = "./heendy.png"; // 이미지 소스 설정
+                imageElement.alt = "흰디 이미지"; // 대체 텍스트 설정 (이미지가 로드되지 않을 경우 표시)
+
+                // 메세지 추가
+
+                // message.topic이 topicNameText와 같을 때만 이미지를 추가
+                if (message.topic === topicNameText) {
+                    const heendychatContainer = document.createElement('div');
+                    heendychatContainer.className = 'heendy_chat_container';
+
+                    heendychatContainer.appendChild(imageElement);
+                    messageText.innerText = message.msg.data;
+                    messageElement.classList.add('heendy-message');
+
+
+                    messageElement.appendChild(messageText);
+
+                    heendychatContainer.appendChild(imageElement);
+                    heendychatContainer.appendChild(messageElement);
+
+                    container.appendChild(heendychatContainer);
+
+                } else {
+                    const customerchatContainer = document.createElement('div');
+                    customerchatContainer.className = 'customer_chat_container';
+
+                    messageText.innerText = message.msg.data;
+                    messageElement.classList.add('customer-message');
+
+                    messageElement.appendChild(messageText);
+
+                    customerchatContainer.appendChild(messageElement);
+                    
+                    container.appendChild(customerchatContainer);
+
+                }
+
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                // container.scrollTop = container.scrollHeight;
+
+            }
+        
+        });
+
+        socket.addEventListener('close', (event) => {
+            console.log('웹 소켓 연결이 닫혔습니다.');
+        });
+
+        socket.addEventListener('error', (event) => {
+            console.error('웹 소켓 오류:', event);
+        });
+    </script>
+</body>
+</html>
