@@ -29,6 +29,43 @@
             padding-bottom: 20px;
             z-index: 10; /* 다른 요소 위에 놓기 위해 z-index 사용 */
         }
+        #driving-container-1 {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            font-family: 'NPSfontBold';
+            color: rgba(0, 0, 0, 0.831);
+
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+
+            width: 100vw;
+            max-height: 1060px;
+            padding-bottom: 10px;
+            z-index: 10;
+        }
+        #driving-container-2 {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white; /* 배경색을 흰색으로 지정 */
+
+            font-family: 'NPSfontBold';
+            color: rgba(0, 0, 0, 0.831);
+
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+
+            width: 120vw;
+            height: 250px;
+            padding-bottom: 500px;
+            z-index: 10;
+        }
         h3{
             text-align: center;
             font-size: 100px;
@@ -529,28 +566,6 @@
 </head>
 <body>
     <div id="chat-messages">
-        <!--<h3> 안내 로봇 흰디 </h3>
-        <div class="customer_chat_container">
-            <div class="customer-message"><p>안녕</p></div>
-        </div>
-        <div class="heendy_chat_container">
-            <img class="heendy_img" src="./heendy.png" alt="흰디 이미지">
-            <div class="heendy-message"><p>안녕하세요, 저는 백화점 안내 로봇 흰디입니다. 어떤 도움이 필요하신가요?</p></div>
-        </div>
-        <div class="customer_chat_container">
-            <div class="customer-message"><p>파란색 운동화를 찾고있어</p></div>
-        </div>
-        <div class="heendy_chat_container">
-            <img class="heendy_img" src="./heendy.png" alt="흰디 이미지">
-            <div class="heendy-message"><p>아하 글쿤요</p></div>
-        </div>
-        <div class="customer_chat_container">
-            <div class="customer-message"><p>꼽니?</p></div>
-        </div>
-        <div class="heendy_chat_container">
-            <img class="heendy_img" src="./heendy.png" alt="흰디 이미지">
-            <div class="heendy-message"><p>아아아니요</p></div>
-        </div>-->
     </div>
 
     <div class="white"></div>
@@ -606,12 +621,25 @@
         <div class="snowflake"></div>
         <div class="snowflake"></div>
         <div class="snowflake"></div>
-   </div>
+    </div>
+
+    
+    <div id="driving-container-2" style="display: inline-block;">
+        <!-- Add any content related to driving messages here -->
+    </div>
+    <div id="driving-container-1" style="display: inline-block;">
+        <h3>주행 중 입니다. 조심하세요!</h3>
+        <!-- Add any content related to driving messages here -->
+    </div>
+    <img id="heartImage" src="./heart_arm.png" alt="하트 이미지" style="position: fixed; top: 0px; left: 50%; transform: translateX(-50%); display: none; z-index: 20;">
 
     <script>
         const socket = new WebSocket('ws://localhost:9090');
         const topicNameText = '/heendy_text';
         const topicNameStt = '/heendy_stt';
+        const topicNameWalk = '/heendy_walk';
+        const topicNameAd = '/heendy_alk';
+        const topicNameheart = '/heendy_emotion';
 
         function subscribeToTopic(topic) {
             socket.send(JSON.stringify({
@@ -625,63 +653,91 @@
             console.log('웹 소켓 연결이 열렸습니다.');
             subscribeToTopic(topicNameText);
             subscribeToTopic(topicNameStt);
+            subscribeToTopic(topicNameWalk);
+            subscribeToTopic(topicNameAd);
+            subscribeToTopic(topicNameheart);
         });
 
         socket.addEventListener('message', (event) => {
             const message = JSON.parse(event.data);
             console.log('수신된 메시지:', message);
 
-            if (message.op === 'publish') {
+            if (message.topic === topicNameWalk){
+                // 주행 div hide
+                const drivingContainer_1 = document.getElementById('driving-container-1');
+                const drivingContainer_2 = document.getElementById('driving-container-2');
 
-                // 새로운 div 생성
-                const container = document.getElementById('chat-messages');
-
-                const messageElement = document.createElement('div');
-
-                const messageText = document.createElement('p');
-
-                const imageElement = document.createElement("img"); // img 요소 생성
-                imageElement.className = 'heendy_img';
-                imageElement.src = "./heendy.png"; // 이미지 소스 설정
-                imageElement.alt = "흰디 이미지"; // 대체 텍스트 설정 (이미지가 로드되지 않을 경우 표시)
-
-                // 메세지 추가
-
-                // message.topic이 topicNameText와 같을 때만 이미지를 추가
-                if (message.topic === topicNameText) {
-                    const heendychatContainer = document.createElement('div');
-                    heendychatContainer.className = 'heendy_chat_container';
-
-                    heendychatContainer.appendChild(imageElement);
-                    messageText.innerText = message.msg.data;
-                    messageElement.classList.add('heendy-message');
-
-
-                    messageElement.appendChild(messageText);
-
-                    heendychatContainer.appendChild(imageElement);
-                    heendychatContainer.appendChild(messageElement);
-
-                    container.appendChild(heendychatContainer);
-
+                // Check the message content or any other condition to determine visibility
+                if (message.msg.data === 'end') {
+                    drivingContainer_1.style.display = 'none';  // Hide the driving div
+                    drivingContainer_2.style.display = 'none';  // Hide the driving div
                 } else {
-                    const customerchatContainer = document.createElement('div');
-                    customerchatContainer.className = 'customer_chat_container';
+                    drivingContainer_1.style.display = 'block'; // Show the driving div
+                    drivingContainer_2.style.display = 'block'; // Show the driving divt
+                }
+            }
+            else if (message.topic === topicNameheart && message.msg.data === '하트'){
+                // heart_arm.png 띄우기
+                const heartImage = document.getElementById('heartImage');
+                heartImage.style.display = 'block';
+            }
+            else{
+                if (message.op === 'publish') {
 
-                    messageText.innerText = message.msg.data;
-                    messageElement.classList.add('customer-message');
+                    // 새로운 div 생성
+                    const container = document.getElementById('chat-messages');
 
-                    messageElement.appendChild(messageText);
+                    const messageElement = document.createElement('div');
 
-                    customerchatContainer.appendChild(messageElement);
-                    
-                    container.appendChild(customerchatContainer);
+                    const messageText = document.createElement('p');
+
+                    const imageElement = document.createElement("img"); // img 요소 생성
+                    imageElement.className = 'heendy_img';
+                    imageElement.src = "./heendy.png"; // 이미지 소스 설정
+                    imageElement.alt = "흰디 이미지"; // 대체 텍스트 설정 (이미지가 로드되지 않을 경우 표시)
+
+                    // 메세지 추가
+
+                    // message.topic이 topicNameText와 같을 때만 이미지를 추가
+                    if (message.topic === topicNameText) {
+                        const heendychatContainer = document.createElement('div');
+                        heendychatContainer.className = 'heendy_chat_container';
+
+                        heendychatContainer.appendChild(imageElement);
+                        messageText.innerText = message.msg.data;
+                        messageElement.classList.add('heendy-message');
+
+
+                        messageElement.appendChild(messageText);
+
+                        heendychatContainer.appendChild(imageElement);
+                        heendychatContainer.appendChild(messageElement);
+
+                        container.appendChild(heendychatContainer);
+
+                    } else {
+                        const customerchatContainer = document.createElement('div');
+                        customerchatContainer.className = 'customer_chat_container';
+
+                        messageText.innerText = message.msg.data;
+                        messageElement.classList.add('customer-message');
+
+                        messageElement.appendChild(messageText);
+
+                        customerchatContainer.appendChild(messageElement);
+                        
+                        container.appendChild(customerchatContainer);
+
+                    }
+
+                    //window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    container.scrollTop = container.scrollHeight;
 
                 }
-
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                // container.scrollTop = container.scrollHeight;
-
+            }
+            if (message.topic === topicNameAd && message.msg.data === 'start') {
+                // two 메시지가 오면 heendy_snow.html로 이동
+                window.location.href = 'advertisement.html';
             }
         
         });
