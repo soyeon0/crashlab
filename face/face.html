@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROS 2 WebSocket Subscriber</title>
+</head>
+<body>
+    <div id="message-container"></div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:9090'); // ROS 2 웹 소켓 포트
+        const topicNameEmotion = '/heendy_emotion'; // 감정 관련 토픽
+        const topicNameTalking = '/heendy_talking'; // 대화 관련 토픽
+        const topicNameText = '/heendy_text';
+        const topicNameStt = '/heendy_stt';
+
+        // 초기 GIF 경로
+        let gifPatheye = 'blink2.gif';
+        let gifPathmouth = 'no_talk.gif';
+
+        // 초기 상태 GIF 표시
+        const messageContainer = document.getElementById('message-container');
+        messageContainer.innerHTML = `<img src="${gifPatheye}" alt="Default GIF" style="height:601px; width: 1920px; position: relative;">
+                                      <img src="${gifPathmouth}" alt="Default GIF" style="height:479px; width: 1920px; position: relative; top:-6px;">`;
+
+        function subscribeToTopic(topic) {
+            socket.send(JSON.stringify({
+                op: 'subscribe',
+                topic: topic,
+                type: 'std_msgs/String',
+            }));
+        }
+        socket.addEventListener('open', (event) => {
+            console.log('웹 소켓 연결이 열렸습니다.');
+            subscribeToTopic(topicNameEmotion);
+            subscribeToTopic(topicNameTalking);
+            subscribeToTopic(topicNameText);
+            subscribeToTopic(topicNameStt);
+        });
+
+        socket.addEventListener('message', (event) => {
+            const message = JSON.parse(event.data);
+            console.log('수신된 메시지:', message);
+
+            // 수신된 메시지를 HTML에 갱신
+            if (message.op === 'publish') {
+
+                if (message.topic === topicNameEmotion) {
+                    // 감정 메시지 처리
+                    switch (message.msg.data) {
+                        case '무기분':
+                            gifPatheye = 'blink2.gif';
+                            gifPathmouth = 'talk.gif';
+                            break;
+                        case '기쁨':
+                            gifPatheye = 'smile.gif';
+                            gifPathmouth = 'talk.gif';
+                            break;
+                        case '슬픔':
+                            gifPatheye = 'sad.gif';
+                            gifPathmouth = 'sad_talk.gif';
+                            break;
+                        case '하트':
+                            gifPatheye = 'heart_eye.gif';
+                            gifPathmouth = 'talk.gif';
+                            break;
+                        default:
+                            gifPatheye = 'blink2.gif';
+                            gifPathmouth = 'talk.gif';
+                    }
+                } else if (message.topic === topicNameTalking) {
+                    // 대화 메시지 처리
+                    if (message.msg.data === 'end') {
+                        gifPathmouth = 'no_talk.gif';
+                    }
+                } else if (message.topic === topicNameStt) {
+                    // 대화 메시지 처리
+                    gifPatheye = 'think.gif';
+                    gifPathmouth = 'think_mouth.gif';
+                }
+
+                // GIF 업데이트
+                messageContainer.innerHTML = `<img src="${gifPatheye}" alt="Default GIF" style="height:601px; width: 1920px; position: relative;">
+                                              <img src="${gifPathmouth}" alt="Default GIF" style="height:479px; width: 1920px; position: relative; top:-6px;">`;
+
+            }
+        });
+
+        socket.addEventListener('close', (event) => {
+            console.log('웹 소켓 연결이 닫혔습니다.');
+        });
+
+        socket.addEventListener('error', (event) => {
+            console.error('웹 소켓 오류:', event);
+        });
+    </script>
+</body>
+</html>
