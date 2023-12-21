@@ -730,7 +730,8 @@
                         heendychatContainer.appendChild(messageElement);
 
                         container.appendChild(heendychatContainer);
-                    } else {
+                    } 
+                    else if (message.topic === topicNameStt) {
                         thinkingContainer.style.display = 'block';
                         const customerchatContainer = document.createElement('div');
                         customerchatContainer.className = 'customer_chat_container';
