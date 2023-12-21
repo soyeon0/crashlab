@@ -42,6 +42,13 @@ class EmotionControlNode(Node):
             10
         )
 
+        self.emotion_subscriber = self.create_subscription(
+            String,
+            '/heendy_ad',
+            self.stop_callback,
+            10
+        )
+
         GPIO.setmode(GPIO.BOARD)  # GPIO 설정
         GPIO.setup(servo_pin_tail, GPIO.OUT)  # 서보핀 출력으로 설정
 
