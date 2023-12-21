@@ -13,7 +13,13 @@
             font-weight: 700;
             font-style: normal;
         }
-        
+        #thinking-container {
+            position: sticky;
+            top: 0;
+            background-color: #fff; /* 배경색을 설정하거나 필요에 따라 다른 스타일을 적용할 수 있습니다. */
+            z-index: 100; /* 다른 요소 위에 놓기 위해 z-index 사용 */
+            display: none;
+        }
         #chat-messages {
             position: absolute;
 
@@ -641,8 +647,10 @@
         const socket = new WebSocket('ws://localhost:9090');
         const topicNameText = '/heendy_text';
         const topicNameStt = '/heendy_stt';
-        const topicNameWalk = '/heendy_walk';
-        const topicNameAd = '/heendy_talk';
+        const topicNameWalk = '/chatter';
+        const topicNameAd = '/heendy_ad';
+        const topicNamepl = '/heendy_place';
+        const topicNamehome = '/heendy_home';
         const topicNameheart = '/heendy_emotion';
 
         function subscribeToTopic(topic) {
@@ -660,6 +668,8 @@
             subscribeToTopic(topicNameWalk);
             subscribeToTopic(topicNameAd);
             subscribeToTopic(topicNameheart);
+            subscribeToTopic(topicNamepl);
+            subscribeToTopic(topicNamehome);
         });
 
         socket.addEventListener('message', (event) => {
@@ -670,15 +680,15 @@
                 // 주행 div hide
                 const drivingContainer_1 = document.getElementById('driving-container-1');
                 const drivingContainer_2 = document.getElementById('driving-container-2');
-
-                // Check the message content or any other condition to determine visibility
-                if (message.msg.data === 'end') {
-                    drivingContainer_1.style.display = 'none';  // Hide the driving div
-                    drivingContainer_2.style.display = 'none';  // Hide the driving div
-                } else {
-                    drivingContainer_1.style.display = 'block'; // Show the driving div
-                    drivingContainer_2.style.display = 'block'; // Show the driving divt
-                }
+                drivingContainer_1.style.display = 'none';  // Hide the driving div
+                drivingContainer_2.style.display = 'none';  // Hide the driving div
+            }
+            else if (message.topic === topicNamepl || message.topic === topicNamehome){
+                // 주행 div hide
+                const drivingContainer_1 = document.getElementById('driving-container-1');
+                const drivingContainer_2 = document.getElementById('driving-container-2');
+                drivingContainer_1.style.display = 'block';  // Hide the driving div
+                drivingContainer_2.style.display = 'block';  // Hide the driving div
             }
             else if (message.topic === topicNameheart && message.msg.data === '하트'){
                 // heart_arm.png 띄우기
@@ -705,6 +715,7 @@
 
                     // message.topic이 topicNameText와 같을 때만 이미지를 추가
                     if (message.topic === topicNameText) {
+                        thinkingContainer.style.display = 'none';
                         const heendychatContainer = document.createElement('div');
                         heendychatContainer.className = 'heendy_chat_container';
 
@@ -719,10 +730,8 @@
                         heendychatContainer.appendChild(messageElement);
 
                         container.appendChild(heendychatContainer);
-
-                        thinkingContainer.style.display = 'none';
-
                     } else {
+                        thinkingContainer.style.display = 'block';
                         const customerchatContainer = document.createElement('div');
                         customerchatContainer.className = 'customer_chat_container';
 
@@ -734,9 +743,6 @@
                         customerchatContainer.appendChild(messageElement);
                         
                         container.appendChild(customerchatContainer);
-
-                        thinkingContainer.style.display = 'block';
-
                     }
 
                     //window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -744,7 +750,7 @@
 
                 }
             }
-            if (message.topic === topicNameAd && message.msg.data === 'start') {
+            if (message.topic === topicNameAd) {
                 // two 메시지가 오면 heendy_snow.html로 이동
                 window.location.href = 'advertisement.html';
             }
